@@ -1,13 +1,11 @@
 import random
 import string
+import argparse
 
 
-class PasswordGenerator:
-   def generate_secure_password(self):
-    min_len = input('Enter the length of the password: ')
-    min_upper = input('Enter the number of capital letters: ')
-    min_digit = input('Enter the number of digits: ')
-    min_special = input('Enter the number of special characters: ')
+def generate_secure_password(min_len, min_upper, min_digit, min_special):
+    if min_len < (min_upper + min_digit + min_special):
+        raise ValueError('Password length is too short for the given requirements')
 
     uppercase = string.ascii_uppercase
     lowercase = string.ascii_lowercase
@@ -15,11 +13,11 @@ class PasswordGenerator:
     special = '!@#$%^&*'
 
     password_list = []
-    password_list += random.choices(uppercase, k=int(min_upper))
-    password_list += random.choices(digits, k=int(min_digit))
-    password_list += random.choices(special, k=int(min_special))
+    password_list += random.choices(uppercase, k=min_upper)
+    password_list += random.choices(digits, k=min_digit)
+    password_list += random.choices(special, k=min_special)
 
-    remaining = int(min_len) - len(password_list)
+    remaining = min_len - len(password_list)
     if remaining > 0:
         password_list += random.choices(lowercase, k=remaining)
 
@@ -28,18 +26,19 @@ class PasswordGenerator:
 
 
 def main():
-    generator = PasswordGenerator()
-    print('Welcome! Let\'s generate your own secure password.')
-    print('Print \'X\' to go to the next step.')
-    print('-' * 60)
+    parser = argparse.ArgumentParser(description='Generate your password based on the given criteria')
+    parser.add_argument('--length', type=int, required=True, help='Length of the password')
+    parser.add_argument('--upper', type=int, required=True, help='Minimum number of uppercase letters')
+    parser.add_argument('--digits', type=int, required=True, help='Minimum number of digits')
+    parser.add_argument('--special', type=int, required=True, help='Minimum number of special characters')
 
-    while True:
-        password = input('Text here: ').strip()
+    args = parser.parse_args()
 
-        if password.lower() == 'x':
-            pwd = generator.generate_secure_password()
-            print(f'Your generated password is{pwd}')
-            break
+    try:
+        password = generate_secure_password(args.length, args.upper, args.digits, args.special)
+        print(f'Your generated password is {password}')
+    except ValueError as e:
+        print(f'Error: {e}')
 
 
 if __name__ == '__main__':
